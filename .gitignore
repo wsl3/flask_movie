@@ -1,4 +1,6 @@
 # 存储密码等私密数据
 .env
+
 __pycache__
-*.pyc 
+*.pyc
+.idea* 
