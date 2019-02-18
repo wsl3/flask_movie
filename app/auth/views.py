@@ -3,9 +3,10 @@
 """
 
 from app.auth import auth
+from flask import current_app, render_template
 from app.extensions import db
 
 @auth.route("/")
 def index():
 
-    return "Hello Flask!"
+    return render_template("auth/index.html")
