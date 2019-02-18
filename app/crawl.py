@@ -8,32 +8,35 @@ import requests
 from lxml import etree
 from bs4 import BeautifulSoup
 from datetime import datetime
+import json
 import re
 
 PASSWORD = '7758521'
-url_begin = "https://movie.douban.com/j/search_subjects"
-headers = {'Accept': 'text/html, application/xhtml+xml, image/jxr, */*',
-           'Accept - Encoding': 'gzip, deflate',
-           'Accept-Language': 'zh-Hans-CN, zh-Hans; q=0.5',
+
+headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+           'Accept - Encoding': 'gzip, deflate, br',
+           'Accept-Language': 'zh-CN,zh;q=0.9',
+           'Host': 'movie.douban.com',
            'Connection': 'Keep-Alive',
-           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'}
+           'Pragma': 'no-cache',
+           'Upgrade-Insecure-Requests': '1',
+           'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36'
+           }
 
 
-def begin_crawl(pages=1, url=url_begin):
+def begin_crawl(pages=1):
     movies = []
-    for page in range(pages):
-        params = {
-            'type': 'movie',
-            'tag': '热门',
-            'sort': 'recommend',
-            'page_limit': '20',
-            'page_start': '{}'.format(page * 20)
-        }
+    dex = 1
 
-        response = requests.get(url=url, params=params, headers=headers)
+    for page in range(pages):
+        url_begin = "https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&sort=recommend&page_" \
+                    "limit=20&page_start={}".format(page*20)
+
+
+        response = requests.get(url=url_begin, headers=headers, allow_redirects=False)
         response.raise_for_status()
 
-        for movie in response.json()['subjects']:
+        for movie in response.json().get('subjects'):
             movie_msg = {}  # movie info
             user_msg = []  # user and comments info
 
@@ -42,12 +45,16 @@ def begin_crawl(pages=1, url=url_begin):
             movie_msg['details_url'] = movie.get('url')  # 不是电影播放地址,是电影详情页面地址
             movie_msg['movie_picture'] = movie.get('cover')
 
+            print("正在爬取第%d部电影: %s\t" % (dex, movie_msg.get('title')), end="\t")
             get_movie_details(movie_msg, user_msg)
+
             movies.append({"movie_msg": movie_msg, "user_msg": user_msg})
+            print("Success!")
+            dex += 1
             # 把数据全部插到数据库中
             # print("{:*^80}".format(movie_msg['title']))
             # print('movie title:\t', movie_msg['title'])
-            # print('score:\t', movie_msg['score'])
+            # print('score:\t', movie_msg['actors'])
             # print("movie_url:\t", movie_msg['movie_url'])
             # print("tags:\t", movie_msg['tags'])
             #
@@ -72,7 +79,7 @@ def get_movie_details(movie_msg, user_msg):
     movie_msg['director'] = html.xpath('//a[@rel="v:directedBy"]/text()')
     movie_msg['tags'] = html.xpath('//div[@id="info"]/span[@property="v:genre"]/text()')
     movie_msg['year'] = html.xpath('//div[@id="info"]/span[@property="v:initialReleaseDate"]/text()')
-    movie_msg['time'] = html.xpath('//div[@id="info"]/span[@property="v:runtime"]/text()')
+    movie_msg['time'] = html.xpath('//div[@id="info"]/span[@property="v:runtime"]/text()')[0]
     movie_msg['summary'] = html.xpath('//span[@property="v:summary"]/text()')[0].strip()
     finally_url = html.xpath('//li[@class="label-trailer"]/a[@class="related-pic-video"]/@href')
 
@@ -121,5 +128,5 @@ def get_movie_comment(movie_msg, user_msg, finally_url):
         user_['comment'] = b
         user_msg.append(user_)
 
-
-begin_crawl()
+if __name__ == "__main__":
+    begin_crawl()
