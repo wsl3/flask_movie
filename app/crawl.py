@@ -8,7 +8,7 @@ import requests
 from lxml import etree
 from bs4 import BeautifulSoup
 from datetime import datetime
-import json
+import time
 import re
 
 PASSWORD = '7758521'
@@ -51,6 +51,8 @@ def begin_crawl(pages=1):
             movies.append({"movie_msg": movie_msg, "user_msg": user_msg})
             print("Success!")
             dex += 1
+
+            time.sleep(0.5)
             # 把数据全部插到数据库中
             # print("{:*^80}".format(movie_msg['title']))
             # print('movie title:\t', movie_msg['title'])
@@ -85,9 +87,12 @@ def get_movie_details(movie_msg, user_msg):
 
     # actors = html.xpath('//span[@class="attrs"]/span/a[@rel]')    why it is unuseful? fucking you!!!
     actors = []
-    for i in soup.find("span", class_="actor").find("span", class_="attrs").find_all("a"):
-        actors.append(i.string)
-    movie_msg['actors'] = actors
+    try:
+        for i in soup.find("span", class_="actor").find("span", class_="attrs").find_all("a"):
+            actors.append(i.string)
+        movie_msg['actors'] = actors
+    except AttributeError:
+        movie_msg['actors'] = ["未知"]
 
     pattern = '制片国家/地区:</span>(.*?)<br/>.*>语言:</span>(.*?)<br/>'  # 网页上是<br>，但是这里必须写<br/>才能匹配
     try:

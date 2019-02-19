@@ -6,6 +6,7 @@ from app.auth import auth  # blueprint: auth
 from app.crawl import begin_crawl
 from faker import Faker
 import click
+from sqlalchemy import text
 
 
 def create_app(config_name=None):
@@ -18,11 +19,18 @@ def create_app(config_name=None):
     app.register_blueprint(auth)  # register auth
 
     register_commands(app=app)
+    register_shell_context(app=app)
     return app
+
+def register_shell_context(app):
+
+    @app.shell_context_processor
+    def make_shell_context():
+        return dict(db=db, Category=Category, Movie=Movie, Comment=Comment, User=User, text=text)
+
 
 
 def register_commands(app):
-
     @app.cli.command()
     def rebuild():
         db.drop_all()
@@ -36,11 +44,11 @@ def register_commands(app):
         click.echo("即将开始爬取工作, 共有%d页, %d部电影！\n" % (pages, pages * 20))
 
         dex = 0
-        movies = begin_crawl(pages=pages) # type(movies) -> []
+        movies = begin_crawl(pages=pages)  # type(movies) -> []
         click.echo("\n开始数据库存入操作！\n")
 
         for movie_info in movies:
-            movie_msg = movie_info.get('movie_msg') # -> {}
+            movie_msg = movie_info.get('movie_msg')  # -> {}
             user_msg = movie_info.get('user_msg')  # -> [{},{}]
 
             dex += 1
@@ -63,22 +71,35 @@ def register_commands(app):
             db.session.add(movie)
             db.session.commit()
 
+            current_movie = Movie.query.filter_by(title=movie_msg.get('title')).first()
+
             # 创建Category
             for type in movie_msg.get('tags'):
-                if Category.query.filter_by(type=type).first():
+                # 有这个电影tag, 直接把电影添加到该tag中
+                cate = Category.query.filter_by(type=type).first()
+                if cate:
+                    cate.movies.append(current_movie)
                     continue
-
+                # 没有该tag, 创建该tag, 再把该电影添加到该tag中
                 category = Category(
-                    type=type.strip()
+                    type=type
                 )
-                category.movies.append(Movie.query.filter_by(title=movie_msg.get('title')).first())
+                category.movies.append(current_movie)
                 db.session.add(category)
 
             db.session.commit()
 
-            # 创建User
+            # 创建User and Comment
             for u in user_msg:
-                if User.query.filter_by(username=u.get('username')).first():
+                comment = Comment(
+                    body=u.get('comment'),
+                    timestamp=u.get('timestamp'),
+                    movie=current_movie
+                    # user=User.query.filter(User.username == u.get('username')).first()
+                )
+                us = User.query.filter_by(username=u.get('username')).first()
+                if us:
+                    comment.user = us
                     continue
 
                 user = User(
@@ -87,21 +108,14 @@ def register_commands(app):
                     email=f.email(),
                     head_picture=u.get('head_picture')
                 )
+                comment.user = user
                 db.session.add(user)
             db.session.commit()
 
-            # 创建Comment
-            for u in user_msg:
-                comment = Comment(
-                    body=u.get('comment'),
-                    timestamp=u.get('timestamp'),
-                    movie=Movie.query.filter(Movie.title==movie_msg.get('title')).first(),
-                    user=User.query.filter(User.username==u.get('username')).first()
-                )
-                db.session.add(comment)
-            db.session.commit()
+            # # 创建Comment
+            # for u in user_msg:
+            #
+            #     db.session.add(comment)
+            # db.session.commit()
 
         click.echo("Run!Run!Run!\n信息全部存储完毕,转战前线！\n你指尖跳动的电光,是我不变的信仰！\n")
-
-
-
