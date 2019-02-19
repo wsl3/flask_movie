@@ -4,9 +4,11 @@
 
 from app.auth import auth
 from flask import current_app, render_template
-from app.extensions import db
+from sqlalchemy import text
+from app.models import Movie, User, Category, Comment
 
 @auth.route("/")
 def index():
+    movies = Movie.query.filter(text("id<:id")).params(id=9).all()
 
-    return render_template("auth/index.html")
+    return render_template("auth/index.html", movies=movies)
