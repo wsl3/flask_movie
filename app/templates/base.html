@@ -1,16 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="webkit" name="renderer">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1 , user-scalable=no" name="viewport">
     <title>微电影</title>
-    <link rel="shortcut icon" href="{{url_for('static', filename='base/images/logo.png')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='base/css/bootstrap.min.css')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='base/css/bootstrap-movie.css')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='base/css/animate.css')}}">
+    <link href="{{url_for('static', filename='base/images/logo.png')}}" rel="shortcut icon">
+    <link href="{{url_for('static', filename='base/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='base/css/bootstrap-movie.css')}}" rel="stylesheet">
+    <!--<link rel="stylesheet" href="{{url_for('static', filename='base/css/animate.css')}}">-->
+    {% block style %}
     <style>
         .navbar-brand>img {
             display: inline;
@@ -24,56 +25,62 @@
         }
 
     </style>
+    {% endblock %}
 </head>
 
 <body>
 <!--导航-->
+
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <!--小屏幕导航按钮和logo-->
         <div class="navbar-header">
-            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a href="index.html" class="navbar-brand" style="width:250px;">
+            <a class="navbar-brand" href="{{ url_for('auth.index')}}" style="width:250px;">
                 <img src="{{url_for('static', filename='base/images/logo.png')}}" style="height:30px;">&nbsp;微电影
             </a>
         </div>
         <!--小屏幕导航按钮和logo-->
         <!--导航-->
         <div class="navbar-collapse collapse">
-            <form class="navbar-form navbar-left" role="search" style="margin-top:18px;">
+            <form action="{{url_for('auth.search')}}" class="navbar-form navbar-left" method="get" role="search" style="margin-top:18px;">
                 <div class="form-group input-group">
-                    <input type="text" class="form-control" placeholder="请输入电影名！">
+                    <input class="form-control" name="search" placeholder="请输入电影名！" type="text">
                     <span class="input-group-btn">
-                        <a class="btn btn-default" href="search.html"><span class="glyphicon glyphicon-search"></span>&nbsp;搜索</a>
+                        <input class="btn btn-default" class="glyphicon glyphicon-search" type="submit" value="找一找">
                     </span>
                 </div>
             </form>
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a class="curlink" href="index.html"><span class="glyphicon glyphicon-film"></span>&nbsp;电影</a>
+                    <a class="curlink" href="{{ url_for('auth.index')}}"><span class="glyphicon glyphicon-film"></span>&nbsp;电影</a>
                 </li>
-                <li>
-                    <a class="curlink" href="login.html"><span class="glyphicon glyphicon-log-in"></span>&nbsp;登录</a>
-                </li>
-                <li>
-                    <a class="curlink" href="register.html"><span class="glyphicon glyphicon-plus"></span>&nbsp;注册</a>
-                </li>
-                <li>
-                    <a class="curlink" href="logout.html"><span class="glyphicon glyphicon-log-out"></span>&nbsp;退出</a>
-                </li>
-                <li>
-                    <a class="curlink" href="user.html"><span class="glyphicon glyphicon-user"></span>&nbsp;会员</a>
-                </li>
+                {% if not session.get('username') %}
+                    <li>
+                        <a class="curlink" href="{{url_for('auth.login')}}"><span class="glyphicon glyphicon-log-in"></span>&nbsp;登录</a>
+                    </li>
+                    <li>
+                        <a class="curlink" href="{{url_for('auth.register')}}"><span class="glyphicon glyphicon-plus"></span>&nbsp;注册</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a class="curlink" href="{{url_for('auth.logout')}}"><span class="glyphicon glyphicon-log-out"></span>&nbsp;退出</a>
+                    </li>
+                    <li>
+                        <a class="curlink" href="{{url_for('auth.self_center')}}"><span class="glyphicon glyphicon-user"></span>&nbsp{{ session.get('username') }}</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
         <!--导航-->
 
     </div>
 </nav>
+<br/>
 
 {% block main %}
 {% endblock %}
@@ -84,7 +91,7 @@
         <div class="row">
             <div class="col-md-12">
                 <p>
-                    ©&nbsp;2017&nbsp;flaskmovie.imooc.com&nbsp;京ICP备 13046642号-2
+                    ©&nbsp;2019&nbsp;flaskmovie-wsl
                 </p>
             </div>
         </div>

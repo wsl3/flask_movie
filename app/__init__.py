@@ -22,15 +22,45 @@ def create_app(config_name=None):
     register_shell_context(app=app)
     return app
 
-def register_shell_context(app):
 
+def register_shell_context(app):
     @app.shell_context_processor
     def make_shell_context():
         return dict(db=db, Category=Category, Movie=Movie, Comment=Comment, User=User, text=text)
 
 
-
 def register_commands(app):
+    @app.cli.command()
+    @click.option("--username", default="root", help="create a username of admin")
+    @click.option("--password", default="666", help="create a password of admin")
+    @click.option("--email", default="admin@mail", help="create a email of admin")
+    @click.option("--head_picture", default="http://img.hao661.com/qq.hao661.com/uploads/allimg/180922/1S9294412-0.jpg",
+                  help="create a head_picture of admin")
+    def admin(username, password, email, head_picture):
+
+        click.echo("Admin username:\t%s" % username)
+        click.echo("Admin password:\t%s" % password)
+        click.echo("Admin    email:\t%s" % email)
+        admin = User.query.filter_by(is_admin=True).first()
+        if admin:
+            admin.username = username
+            admin.password = password
+            admin.email = email,
+            admin.head_picture = head_picture
+
+        else:
+            admin = User(
+                username=username,
+                password=password,
+                email=email,
+                head_picture=head_picture,
+                is_admin=True
+            )
+        db.session.add(admin)
+        db.session.commit()
+
+        click.echo("...Done!\n")
+
     @app.cli.command()
     def rebuild():
         db.drop_all()
