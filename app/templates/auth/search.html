@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="container" style="margin-top:76px">
+    <div class="row">
+        <div class="col-md-12">
+            <ol class="breadcrumb" style="margin-top:6px;">
+                <li>与"{{ args }}"有关的电影,共{{ find | length }}部</li>
+            </ol>
+        </div>
+        <div class="col-md-12">
+            {% for item in find %}
+                <div class="media">
+                    <div class="media-left">
+                        <a href="play.html">
+                            <img class="media-object" src="holder.js/131x83" alt="{{ item.title }}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading">{{ item.title }}<a href="play.html" class="label label-primary pull-right"><span class="glyphicon glyphicon-play"></span>播放影片</a></h4>
+                        {{ item.summary }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-12 text-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li>
+                        <a href="#" aria-label="First">
+                            <span aria-hidden="true">首页</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" aria-label="Previous">
+                            <span aria-hidden="true">上一页</span>
+                        </a>
+                    </li>
+                    <li><a href="#">1&nbsp;/&nbsp;10</a></li>
+                    <li>
+                        <a href="#" aria-label="Next">
+                            <span aria-hidden="true">下一页</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" aria-label="Last">
+                            <span aria-hidden="true">尾页</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

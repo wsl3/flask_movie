@@ -12,7 +12,7 @@
                         <td style="width:10%;">电影标签</td>
                         <td style="width:90%;">
                             {% for cate in categories %}
-                            <a class="label label-info"><span class="glyphicon glyphicon-tag"></span>{{cate.type}}</a>
+                            <a class="label label-info" href="{{ url_for('auth.search', id=cate.id)}}"><span class="glyphicon glyphicon-tag"></span>{{cate.type}}</a>
                             {% endfor %}
                     </tr>
                     <tr>
