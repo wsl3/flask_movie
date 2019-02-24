@@ -16,36 +16,22 @@
                             {% endfor %}
                     </tr>
                     <tr>
-                        <td>电影星级</td>
+                        <td>国家</td>
                         <td>
-                            <a class="label label-warning"><span class="glyphicon glyphicon-star"></span>&nbsp;一星</a>
-                            &nbsp;
-                            <a class="label label-warning"><span class="glyphicon glyphicon-star"></span>&nbsp;二星</a>
-                            &nbsp;
-                            <a class="label label-warning"><span class="glyphicon glyphicon-star"></span>&nbsp;三星</a>
-                            &nbsp;
-                            <a class="label label-warning"><span class="glyphicon glyphicon-star"></span>&nbsp;四星</a>
-                            &nbsp;
-                            <a class="label label-warning"><span class="glyphicon glyphicon-star"></span>&nbsp;五星</a>
+                            {% for coun in country %}
+                            <a class="label label-warning" href="{{ url_for('auth.search2', tag=coun)}}"><span class="glyphicon glyphicon-star"></span>&nbsp{{ coun }}</a>
+                            {% endfor %}
                         </td>
                     </tr>
                     <tr>
                         <td>上映时间</td>
                         <td>
-                            <a class="label label-default"><span class="glyphicon glyphicon-time"></span>&nbsp;最近</span>
+                            {% for t in time %}
+                            <a class="label label-default" href="{{ url_for('auth.search3', tag=t) }}"><span class="glyphicon glyphicon-time"></span>&nbsp;{{ t }}</span>
                             </a>
-                            &nbsp;
-                            <a class="label label-default"><span
-                                    class="glyphicon glyphicon-time"></span>&nbsp;2017</span></a>
-                            &nbsp;
-                            <a class="label label-default"><span
-                                    class="glyphicon glyphicon-time"></span>&nbsp;2016</span></a>
-                            &nbsp;
-                            <a class="label label-default"><span
-                                    class="glyphicon glyphicon-time"></span>&nbsp;2015</span></a>
-                            &nbsp;
-                            <a class="label label-default"><span class="glyphicon glyphicon-time"></span>&nbsp;更早</span>
-                            </a>
+
+                            {% endfor %}
+
                         </td>
                     </tr>
                     <tr>
