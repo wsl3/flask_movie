@@ -19,8 +19,28 @@ def create_app(config_name=None):
     app.register_blueprint(auth)  # register auth
 
     register_commands(app=app)
+    register_template_filter(app=app)
     register_shell_context(app=app)
     return app
+
+
+def register_template_filter(app):
+    # 处理模板中的 演员字段数据
+    @app.template_filter("get_string")
+    def get_string(arg):
+        temp = arg.split("/")
+        if len(temp) > 3:
+            temp = temp[:3]
+        return "/".join(temp)
+
+    # 处理模板中的 电影简介字段数据(简介过长)
+    @app.template_filter("be_smaller")
+    def be_smaller(arg):
+        if len(arg) > 74:
+            arg = arg[:74] + " ..."
+        else:
+            arg += " ..."
+        return arg
 
 
 def register_shell_context(app):

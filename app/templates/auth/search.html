@@ -12,12 +12,12 @@
             {% for item in find %}
                 <div class="media">
                     <div class="media-left">
-                        <a href="play.html">
-                            <img class="media-object" src="holder.js/131x83" alt="{{ item.title }}">
+                        <a href="{{ url_for('auth.display', id=item.id)}}">
+                            <img class="media-object" src="{{ url_for('static', filename='1.webp')}}" alt="{{ item.title }}">
                         </a>
                     </div>
                     <div class="media-body">
-                        <h4 class="media-heading">{{ item.title }}<a href="play.html" class="label label-primary pull-right"><span class="glyphicon glyphicon-play"></span>播放影片</a></h4>
+                        <h4 class="media-heading">{{ item.title }}<a href="{{ url_for('auth.display', id=item.id)}}" class="label label-primary pull-right"><span class="glyphicon glyphicon-play"></span>播放影片</a></h4>
                         {{ item.summary }}
                     </div>
                 </div>

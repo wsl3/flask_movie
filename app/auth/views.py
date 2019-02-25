@@ -76,6 +76,14 @@ def login():
     return render_template("auth/login.html")
 
 
+@auth.route("/display/<int:id>")
+def display(id):
+    movie = Movie.query.get(id)
+    categories = movie.categories
+    comments = movie.comments
+    return render_template("auth/display.html", movie=movie, categories=categories,
+                           comments=comments)
+
 @auth.route("/logout/")
 def logout():
     del session["username"]
