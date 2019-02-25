@@ -8,14 +8,14 @@ from flask import current_app, render_template, request, redirect, url_for, sess
 from sqlalchemy import text, or_
 from app.models import Movie, User, Category, Comment
 
-country = ["中国大陆", "韩国", "日本", "台湾", "美国", "其他"]
-time = ["2019", "2018", "2017", "2016", "更早"]
+
 
 
 @auth.route("/")
 def index():
     movies = Movie.query.filter(text("id<:id")).params(id=9).all()
-
+    country = ["中国大陆", "韩国", "日本", "台湾", "美国", "所有国家"]
+    time = ["2019", "2018", "2017", "2016", "所有时间"]
     categories = Category.query.all()
     return render_template("auth/index.html", movies=movies, categories=categories,
                            country=country, time=time)
@@ -36,22 +36,24 @@ def search(id=0):
     else:
         redirect(url_for('auth.index'))
 
-
+# search movie by country
 @auth.route("/search2/<tag>")
 def search2(tag):
     args = tag
-    if args == "其他":
-        find = Movie.query.filter(~Movie.country.in_(country)).all()
+    if args == "所有国家":
+        find = Movie.query.all()
     else:
         find = Movie.query.filter(Movie.country.like("%{}%".format(args))).all()
     return render_template("auth/search.html", find=find, args=args)
 
-
+# search movie by year
 @auth.route("/search3/<tag>")
 def search3(tag):
     args = tag
-    if args == "更早":
-        find = Movie.query.filter(~Movie.time.in_(time)).all()
+    if args == "所有时间":
+        # 按照 id 逆向排序 find = Movie.query.order_by("-id").all()
+        #                find = Movie.query.order_by(Movie.id.desc()).all()
+        find = Movie.query.order_by(Movie.id).all()
     else:
         find = Movie.query.filter(Movie.year.like("%{}%".format(args))).all()
     return render_template("auth/search.html", find=find, args=args)
