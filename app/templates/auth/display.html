@@ -85,15 +85,15 @@
                     <ol class="breadcrumb" style="margin-top:6px;">
                         <li>全部评论: <b>{{ comments | length }}</b>条</li>
                     </ol>
-                    <form role="form" style="margin-bottom:6px;">
+                    <form role="form" style="margin-bottom:6px;" action="{{url_for('auth.post_comment', movie_id=movie.id)}}" method="POST">
                         <div class="form-group">
                             <div>
                                 <label for="input_content">内容</label>
-                                <textarea id="input_content"></textarea>
+                                <textarea id="input_content" name="comment"></textarea>
                             </div>
                             <div class="col-xs-12" id="error_content"></div>
                         </div>
-                        <a class="btn btn-success" id="btn-sub"><span class="glyphicon glyphicon-edit"></span>&nbsp;提交评论</a>
+                        <input class="btn btn-success" id="btn-sub" type="submit" value="提交评论">
                         &nbsp;
                         <a class="btn btn-danger" id="btn-col"><span class="glyphicon glyphicon-heart"></span>&nbsp;收藏电影</a>
                     </form>
