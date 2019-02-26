@@ -7,6 +7,7 @@ from app.extensions import db
 from flask import current_app, render_template, request, redirect, url_for, session
 from sqlalchemy import text, or_
 from app.models import Movie, User, Category, Comment
+from app.utils import login_required, skip_back
 
 
 
@@ -61,28 +62,50 @@ def search3(tag):
 
 @auth.route("/login/", methods=["GET", "POST"])
 def login():
+    print("login()    {}".format(request.headers.get("Referer")))
     # note!!! redirect()必须被return才能完成url跳转
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
 
         user = User.query.filter_by(username=username, password=password).first()
+        # login sucess
         if user:
             session["username"] = username
+            session["id"] = user.id
             # redirect()必须被return才能完成url跳转
+            return skip_back()
+        # login fail
+        else:
             return redirect(url_for('auth.index'))
+    else:
+        # GET请求 login, 同时在session中记录Referer
+        session["URL"] = request.headers.get("Referer")
+        return render_template("auth/login.html")
 
-        return redirect(url_for('auth.index'))
-    return render_template("auth/login.html")
+
+@auth.route("/post_comment/<int:movie_id>", methods=["POST"])
+@login_required
+def post_comment(movie_id):
+    body = request.form.get("comment")
+
+    comment = Comment(body=body)
+    comment.user_id = session.get("id")
+    comment.movie_id = movie_id
+
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for("auth.display", id=movie_id))
 
 
 @auth.route("/display/<int:id>")
 def display(id):
+
     movie = Movie.query.get(id)
     categories = movie.categories
-    comments = movie.comments
-    return render_template("auth/display.html", movie=movie, categories=categories,
-                           comments=comments)
+    comments = Comment.query.filter(Comment.movie_id==id).order_by(Comment.timestamp.desc()).all()
+    return render_template("auth/display.html", movie=movie, categories=categories,comments=comments)
+
 
 @auth.route("/logout/")
 def logout():
