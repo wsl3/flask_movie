@@ -1,0 +1,45 @@
+{% extends 'base.html'%}
+
+{% block main %}
+<div class="container" style="margin-top:76px">
+    <div class="col-md-3">
+        {% include 'msg_list.html' %}
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title"><span class="glyphicon glyphicon-map-marker"></span>&nbsp;评论记录</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="commentList">
+                    {% for comment in comments%}
+                        <li class="item cl">
+                            <a href="#">
+                                <i class="avatar size-L radius">
+                                    <img alt="50x50" src="holder.js/50x50" class="img-circle" style="border:1px solid #abcdef;">
+                                </i>
+                            </a>
+                            <div class="comment-main">
+                                <header class="comment-header">
+                                    <div class="comment-meta">
+                                        <a class="comment-author" href="#">{{ user.username }}</a>
+                                        评论于
+                                        <time title="{{ comment.timestamp}}" datetime="{{ comment.timestamp}}">{{
+                                            comment.timestamp}}
+                                        </time>
+                                    </div>
+                                </header>
+                                <div class="comment-body">
+                                    <p>{{ comment.body }}</p>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
