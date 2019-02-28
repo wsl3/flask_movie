@@ -8,7 +8,7 @@ def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if session.get("username"):
-            # 这里必须有return, 否则会报错, 视图函数没有返回值
+            # 这里必须有return, 否则会报错(视图函数没有返回值)
             # wrapper相当于视图函数, 必须有返回值
             # 找这个错找了一晚上, Fuck!
             # 吃饭去！

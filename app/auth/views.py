@@ -59,10 +59,9 @@ def search3(tag):
         find = Movie.query.filter(Movie.year.like("%{}%".format(args))).all()
     return render_template("auth/search.html", find=find, args=args)
 
-
+# please pardon me for the shit code of login()
 @auth.route("/login/", methods=["GET", "POST"])
 def login():
-    print("login()    {}".format(request.headers.get("Referer")))
     # note!!! redirect()必须被return才能完成url跳转
     if request.method == "POST":
         username = request.form.get('username')
@@ -73,11 +72,13 @@ def login():
         if user:
             session["username"] = username
             session["id"] = user.id
-            # redirect()必须被return才能完成url跳转
-            return skip_back()
+            if session.get("URL") == url_for("auth.login", _external=True):
+                return redirect(url_for("auth.index"))
+            else:
+                return skip_back()
         # login fail
         else:
-            return redirect(url_for('auth.index'))
+            return redirect(url_for('auth.login'))
     else:
         # GET请求 login, 同时在session中记录Referer
         session["URL"] = request.headers.get("Referer")
@@ -109,7 +110,7 @@ def display(id):
 
 @auth.route("/logout/")
 def logout():
-    del session["username"]
+    session.pop("username", None)
     return redirect(url_for('auth.index'))
 
 
@@ -138,5 +139,45 @@ def register():
 
 
 @auth.route("/vip/", methods=["GET", "POST"])
+@login_required
 def self_center():
-    return render_template('auth/self_center.html')
+    user = User.query.get(session.get("id"))
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        repeat_name = User.query.filter_by(username=username).first()
+        if username and email and not repeat_name:
+            user.username = username
+            user.email = email
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for("auth.index"))
+        else:
+            return redirect(url_for("auth.self_center"))
+    return render_template('auth/self_center.html', user=user)
+
+# change the password
+@auth.route("/vip/change_psw/", methods=["GET", "POST"])
+@login_required
+def change_pwd():
+    if request.method == "POST":
+        user = User.query.get(session.get("id"))
+        oldpwd = request.form.get("oldpwd")
+        newpwd = request.form.get("newpwd")
+
+        if user.password == oldpwd:
+            user.password = newpwd
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for("auth.index"))
+        else:
+            return redirect(url_for("auth.change_pwd"))
+    return render_template("auth/pwd.html")
+
+# comment list
+@auth.route("/vip/comments/")
+@login_required
+def comments_records():
+    user = User.query.get(session.get("id"))
+    comments = Comment.query.filter(Comment.user_id==user.id).order_by(Comment.timestamp.desc()).all()
+    return render_template("auth/comments.html", comments=comments, user=user)
