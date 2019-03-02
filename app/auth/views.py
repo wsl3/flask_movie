@@ -65,14 +65,15 @@ def login():
     # note!!! redirect()必须被return才能完成url跳转
     if request.method == "POST":
         username = request.form.get('username')
-        password = request.form.get('password')
+        pwd = request.form.get('password')
 
-        user = User.query.filter_by(username=username, password=password).first()
+        user = User.query.filter_by(username=username).first()
         # login sucess
-        if user:
+        if user and user.confirm_pwd(pwd):
             session["username"] = username
             session["id"] = user.id
-            if session.get("URL") == url_for("auth.login", _external=True):
+            if (session.get("URL") == url_for("auth.login", _external=True)) or \
+                (session.get("URL") == url_for("auth.register", _external=True)):
                 return redirect(url_for("auth.index"))
             else:
                 return skip_back()
