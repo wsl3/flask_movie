@@ -50,6 +50,8 @@ def register_shell_context(app):
 
 
 def register_commands(app):
+
+    # create a account of admin
     @app.cli.command()
     @click.option("--username", default="root", help="create a username of admin")
     @click.option("--password", default="666", help="create a password of admin")
